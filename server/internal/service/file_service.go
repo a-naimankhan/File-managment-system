@@ -25,6 +25,11 @@ func NewFileService(fRepo domain.FileRepository, uRepo domain.UserRepository, pa
 	}
 }
 
+// нужно ли сделать так что бы один парсил допустим данные и отдавал в функцию ниже ведь в Интерфейсе там именно отдается файл
+// or I have to change the interface arguments or I have to just parse it .
+// Или парсинг что бы отдавать нужные аргументы идет в другом месте
+// ну тут я мог бы изменить на просто файл и через поля структур достигать тоже самое но тут сложность именно с контетом идет
+
 func (s *fileService) UploadFile(ctx context.Context, userID uuid.UUID, fileName string, content io.Reader) (*domain.FileMetadata, error) {
 	_, err := s.userRepo.GetByID(ctx, userID)
 	if err != nil {

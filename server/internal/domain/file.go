@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"io"
 	"time"
 
 	"github.com/google/uuid"
@@ -12,6 +13,7 @@ type FileMetadata struct {
 	UserID     uuid.UUID `db:"user_id" json:"user_id"`
 	Filename   string    `db:"filename" json:"filename"`
 	StoredName string    `db:"stored_name" json:"-"`
+	Path       string    `db:"path" json:"path"`
 	Size       int64     `db:"size" json:"size"`
 	MimeType   string    `db:"mime_type" json:"mime_type"`
 	Checksum   string    `db:"checksum" json:"checksum"`
@@ -25,6 +27,6 @@ type FileRepository interface {
 }
 
 type FileService interface {
-	UploadFile(ctx context.Context, file *FileMetadata) (string, error)
+	UploadFile(ctx context.Context, userID uuid.UUID, fileName string, content io.Reader) (*FileMetadata, error)
 	DownloadFile(ctx context.Context, id uuid.UUID) (*FileMetadata, error)
 }
