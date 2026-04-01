@@ -4,10 +4,14 @@ import (
 	"File-management-system/server/internal/domain"
 	"context"
 	"errors"
+	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
+
+var JWTSecret = []byte("jwt-secret")
 
 type userService struct {
 	userRepo domain.UserRepository
@@ -64,6 +68,19 @@ func (s *userService) Login(ctx context.Context, username, password string) (str
 	}
 	//tut еще отдаю токен и разрешаю входить в систему
 	//ну а пока временный костыль
-	return user.ID.String(), nil
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub":      user.ID.String(),
+		"username": user.Username,
+		"exp":      time.Now().Add(time.Hour * 24).Unix(),
+		"iat":      time.Now().Unix(),
+	})
+
+	tokenString, err := token.SignedString(JWTSecret)
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
 
 }

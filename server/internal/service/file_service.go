@@ -4,6 +4,7 @@ import (
 	"File-management-system/server/internal/domain"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -31,6 +32,13 @@ func NewFileService(fRepo domain.FileRepository, uRepo domain.UserRepository, pa
 // ну тут я мог бы изменить на просто файл и через поля структур достигать тоже самое но тут сложность именно с контетом идет
 
 func (s *fileService) UploadFile(ctx context.Context, userID uuid.UUID, fileName string, content io.Reader) (*domain.FileMetadata, error) {
+	if _, err := os.Stat(s.storagePath); os.IsNotExist(err) {
+		err := os.MkdirAll(s.storagePath, 0755)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create upload dir: %w", err)
+		}
+	}
+
 	_, err := s.userRepo.GetByID(ctx, userID)
 	if err != nil {
 		return nil, errors.New("user not found")

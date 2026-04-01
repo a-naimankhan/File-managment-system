@@ -26,7 +26,7 @@ func (h *Handler) InitRouter() *gin.Engine {
 			auth.POST("/login", h.Login)
 		}
 
-		files := api.Group("/files")
+		files := api.Group("/files", h.userIdentify)
 		{
 			files.POST("/upload", h.Upload)
 			files.GET("/:id", h.Download)
