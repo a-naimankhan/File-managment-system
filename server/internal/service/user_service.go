@@ -11,15 +11,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var JWTSecret = []byte("jwt-secret")
-
 type userService struct {
-	userRepo domain.UserRepository
+	userRepo  domain.UserRepository
+	jwtSecret string
 }
 
-func NewUserService(repo domain.UserRepository) domain.UserService {
+func NewUserService(repo domain.UserRepository, jwtS string) domain.UserService {
 	return &userService{
-		userRepo: repo,
+		userRepo:  repo,
+		jwtSecret: jwtS,
 	}
 }
 
@@ -57,6 +57,7 @@ func (s *userService) Register(ctx context.Context, username, password string) (
 }
 
 func (s *userService) Login(ctx context.Context, username, password string) (string, error) {
+
 	user, err := s.userRepo.GetByUsername(ctx, username)
 	if err != nil {
 		return "", errors.New("user not found")
@@ -76,7 +77,7 @@ func (s *userService) Login(ctx context.Context, username, password string) (str
 		"iat":      time.Now().Unix(),
 	})
 
-	tokenString, err := token.SignedString(JWTSecret)
+	tokenString, err := token.SignedString([]byte(s.jwtSecret))
 	if err != nil {
 		return "", err
 	}

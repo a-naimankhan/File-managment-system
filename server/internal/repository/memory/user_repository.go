@@ -14,7 +14,6 @@ type userRepository struct {
 	users map[uuid.UUID]*domain.User
 }
 
-// can't understand y it doesn't see the UserRepo
 func NewUserRepository() domain.UserRepository {
 	return &userRepository{
 		users: make(map[uuid.UUID]*domain.User),

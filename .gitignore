@@ -1,0 +1,20 @@
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Backend
+/server/bin/
+/server/cmd/upload/    # Игнорируем ту самую папку с загрузками
+/server/cmd/server.exe # Если скомпилил бинарник в cmd
+vendor/
+.env
+
+
+#DB
+/pgdata/
+
+
+#env
+server/ .env

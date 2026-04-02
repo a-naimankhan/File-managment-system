@@ -1,26 +1,37 @@
 package main
 
 import (
+	"File-management-system/server/config"
 	"File-management-system/server/internal/delivery"
 	"File-management-system/server/internal/repository/memory"
+	"File-management-system/server/internal/repository/postgres"
+	"File-management-system/server/internal/repository/postgres/connection"
 	"File-management-system/server/internal/service"
+	"log"
 )
 
 func main() {
-	startServer()
-	select {}
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+	startServer(cfg)
 }
 
-func startServer() {
+func startServer(cfg *config.Config) {
 
-	userRepo := memory.NewUserRepository()
+	db, err := connection.NewPostgresDB(cfg.DB_DSN)
+	if err != nil {
+		panic("Failed to connect to database")
+	}
+	userRepo := postgres.NewUserRepo(db)
 	fileRepo := memory.NewFileRepository()
 
-	userSvc := service.NewUserService(userRepo)
-	fileSvc := service.NewFileService(fileRepo, userRepo, "./upload")
+	userSvc := service.NewUserService(userRepo, cfg.JWTSECRET)
+	fileSvc := service.NewFileService(fileRepo, userRepo, cfg.StoragePath)
 
 	h := delivery.NewHandler(userSvc, fileSvc)
 
 	router := h.InitRouter()
-	router.Run(":8080")
+	router.Run(":" + cfg.Port)
 }
