@@ -3,7 +3,6 @@ package main
 import (
 	"File-management-system/server/config"
 	"File-management-system/server/internal/delivery"
-	"File-management-system/server/internal/repository/memory"
 	"File-management-system/server/internal/repository/postgres"
 	"File-management-system/server/internal/repository/postgres/connection"
 	"File-management-system/server/internal/service"
@@ -25,7 +24,10 @@ func startServer(cfg *config.Config) {
 		panic("Failed to connect to database")
 	}
 	userRepo := postgres.NewUserRepo(db)
-	fileRepo := memory.NewFileRepository()
+	fileRepo := postgres.NewFileRepo(db)
+
+	//userRepo := memory.NewUserRepository()
+	//fileRepo := memory.NewFileRepository()
 
 	userSvc := service.NewUserService(userRepo, cfg.JWTSECRET)
 	fileSvc := service.NewFileService(fileRepo, userRepo, cfg.StoragePath)

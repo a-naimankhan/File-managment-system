@@ -10,16 +10,17 @@ import (
 	"path/filepath"
 
 	"github.com/google/uuid"
+	"github.com/jung-kurt/gofpdf"
 )
 
-type fileService struct {
+type FileService struct {
 	fileRepo    domain.FileRepository
 	userRepo    domain.UserRepository
 	storagePath string
 }
 
-func NewFileService(fRepo domain.FileRepository, uRepo domain.UserRepository, path string) *fileService {
-	return &fileService{
+func NewFileService(fRepo domain.FileRepository, uRepo domain.UserRepository, path string) *FileService {
+	return &FileService{
 		fileRepo:    fRepo,
 		userRepo:    uRepo,
 		storagePath: path,
@@ -31,7 +32,7 @@ func NewFileService(fRepo domain.FileRepository, uRepo domain.UserRepository, pa
 // Или парсинг что бы отдавать нужные аргументы идет в другом месте
 // ну тут я мог бы изменить на просто файл и через поля структур достигать тоже самое но тут сложность именно с контетом идет
 
-func (s *fileService) UploadFile(ctx context.Context, userID uuid.UUID, fileName string, content io.Reader) (*domain.FileMetadata, error) {
+func (s *FileService) UploadFile(ctx context.Context, userID uuid.UUID, fileName string, content io.Reader) (*domain.FileMetadata, error) {
 	if _, err := os.Stat(s.storagePath); os.IsNotExist(err) {
 		err := os.MkdirAll(s.storagePath, 0755)
 		if err != nil {
@@ -75,12 +76,31 @@ func (s *fileService) UploadFile(ctx context.Context, userID uuid.UUID, fileName
 	return metadata, nil
 }
 
-func (s *fileService) DownloadFile(ctx context.Context, id uuid.UUID) (*domain.FileMetadata, error) {
+func (s *FileService) DownloadFile(ctx context.Context, id uuid.UUID) (*domain.FileMetadata, error) {
 	file, err := s.fileRepo.GetByID(ctx, id)
 	if err != nil {
 		return nil, errors.New("file not found")
 	}
 
 	return file, nil
+
+}
+
+func (s *FileService) ConvertImageToPDF(inputPath string, outputPath string) error {
+	if _, err := os.Stat(inputPath); os.IsNotExist(err) {
+		return fmt.Errorf("input path does not exist: %s , err : %s", inputPath, err)
+	}
+
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+
+	pdf.Image(inputPath, 10, 10, 190, 0, false, "", 0, "")
+
+	err := pdf.OutputFileAndClose(outputPath)
+	if err != nil {
+		return fmt.Errorf("output file error: %w", err)
+	}
+
+	return nil
 
 }
