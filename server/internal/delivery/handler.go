@@ -36,12 +36,13 @@ func (h *Handler) InitRouter() *gin.Engine {
 		{
 			tests.GET("/ping", h.Ping)
 		}
-
+		//TODO write handlers for those endpoints
+		//
 		converts := api.Group("/convert"){
 			converts.GET("/" , toFill)
 
-			converts.GET("/img-pdf" , toFill)
-			converts.GET("pdf-img" , toFill)
+			converts.POST("/img-pdf" , toFill)
+			converts.POST("pdf-img" , toFill)
 		}
 	}
 
