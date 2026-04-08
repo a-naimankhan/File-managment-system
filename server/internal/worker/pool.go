@@ -6,7 +6,7 @@ import (
 )
 
 type Task interface {
-	Execute()
+	Execute(ctx context.Context) error
 }
 
 type Pool struct {
@@ -21,13 +21,18 @@ func NewPool(workerCount int) *Pool {
 	}
 }
 
+//FIXME: make the correct task.Execute so it will sign a contract with Task interface correct and will be able to go to the file_service .
+
 func (p *Pool) Start(ctx context.Context) {
 	for i := 0; i < p.workerCount; i++ {
 		go func(id int) {
 			log.Printf("Worker %d starting", id)
 			for {
 				select {
-				case task := <-p.tasks:
+				case task, ok := <-p.tasks:
+					if !ok {
+						return
+					}
 					if err := task.Execute(ctx); err != nil {
 						log.Printf("Worker %d failed", id)
 					}

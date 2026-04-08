@@ -2,6 +2,7 @@ package service
 
 import (
 	"File-management-system/server/internal/domain"
+	"File-management-system/server/internal/worker"
 	"context"
 	"errors"
 	"fmt"
@@ -17,13 +18,15 @@ type FileService struct {
 	fileRepo    domain.FileRepository
 	userRepo    domain.UserRepository
 	storagePath string
+	wp          *worker.Pool
 }
 
-func NewFileService(fRepo domain.FileRepository, uRepo domain.UserRepository, path string) *FileService {
+func NewFileService(fRepo domain.FileRepository, uRepo domain.UserRepository, path string, workerPool *worker.Pool) *FileService {
 	return &FileService{
 		fileRepo:    fRepo,
 		userRepo:    uRepo,
 		storagePath: path,
+		wp:          workerPool,
 	}
 }
 
@@ -84,6 +87,25 @@ func (s *FileService) DownloadFile(ctx context.Context, id uuid.UUID) (*domain.F
 
 	return file, nil
 
+}
+
+func (s *FileService) EnqueuePDFConvertation(ctx context.Context, id uuid.UUID) error {
+	meta, err := s.fileRepo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	input := meta.Path
+	output := input + "pdf"
+
+	task := &ConvertTask{
+		service:    s,
+		InputPath:  input,
+		OutputPath: output,
+	}
+	s.wp.Submit(task)
+
+	return nil
 }
 
 func (s *FileService) ConvertImageToPDF(inputPath string, outputPath string) error {

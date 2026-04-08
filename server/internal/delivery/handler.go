@@ -38,11 +38,12 @@ func (h *Handler) InitRouter() *gin.Engine {
 		}
 		//TODO write handlers for those endpoints
 		//
-		converts := api.Group("/convert"){
-			converts.GET("/" , toFill)
+		converts := api.Group("/convert")
+		{
+			//converts.GET("/" , toFill)
 
-			converts.POST("/img-pdf" , toFill)
-			converts.POST("pdf-img" , toFill)
+			converts.POST("/img-pdf/:id", h.ConvertImageToPDF)
+			//converts.POST("pdf-img" , toFill)
 		}
 	}
 

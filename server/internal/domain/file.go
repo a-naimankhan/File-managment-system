@@ -29,4 +29,5 @@ type FileRepository interface {
 type FileService interface {
 	UploadFile(ctx context.Context, userID uuid.UUID, fileName string, content io.Reader) (*FileMetadata, error)
 	DownloadFile(ctx context.Context, id uuid.UUID) (*FileMetadata, error)
+	EnqueuePDFConvertation(ctx context.Context, id uuid.UUID) error
 }

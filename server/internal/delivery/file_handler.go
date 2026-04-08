@@ -66,3 +66,19 @@ func (h *Handler) Download(c *gin.Context) {
 
 	c.File(fileMeta.Path)
 }
+func (h *Handler) ConvertImageToPDF(c *gin.Context) {
+	fileIDStir := c.Param("id")
+	fileID, err := uuid.Parse(fileIDStir)
+
+	if err != nil {
+		c.JSON(400, gin.H{"error": "invalid file id"})
+	}
+
+	err = h.fileService.EnqueuePDFConvertation(c.Request.Context(), fileID)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Failed to start conversion"})
+		return
+	}
+
+	c.JSON(202, gin.H{"message": "proccessing"})
+}
