@@ -6,7 +6,7 @@ import (
 )
 
 type Task interface {
-	Execute()
+	Execute(ctx context.Context) error
 }
 
 type Pool struct {
@@ -27,12 +27,16 @@ func (p *Pool) Start(ctx context.Context) {
 			log.Printf("Worker %d starting", id)
 			for {
 				select {
-				case task := <-p.tasks:
+				case task, ok := <-p.tasks:
+					if !ok {
+						log.Printf("Worker %d stopped , task channel closed", id)
+						return
+					}
 					if err := task.Execute(ctx); err != nil {
 						log.Printf("Worker %d failed", id)
 					}
 				case <-ctx.Done():
-					log.Printf("Worker %d stopping", id)
+					log.Printf("Worker %d stopping via context", id)
 					return
 				}
 			}

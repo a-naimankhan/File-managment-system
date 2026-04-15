@@ -2,6 +2,7 @@ package service
 
 import (
 	"File-management-system/server/internal/domain"
+	"File-management-system/server/internal/worker"
 	"context"
 	"errors"
 	"fmt"
@@ -17,20 +18,17 @@ type FileService struct {
 	fileRepo    domain.FileRepository
 	userRepo    domain.UserRepository
 	storagePath string
+	wp          *worker.Pool
 }
 
-func NewFileService(fRepo domain.FileRepository, uRepo domain.UserRepository, path string) *FileService {
+func NewFileService(fRepo domain.FileRepository, uRepo domain.UserRepository, path string, wP *worker.Pool) *FileService {
 	return &FileService{
 		fileRepo:    fRepo,
 		userRepo:    uRepo,
 		storagePath: path,
+		wp:          wP,
 	}
 }
-
-// нужно ли сделать так что бы один парсил допустим данные и отдавал в функцию ниже ведь в Интерфейсе там именно отдается файл
-// or I have to change the interface arguments or I have to just parse it .
-// Или парсинг что бы отдавать нужные аргументы идет в другом месте
-// ну тут я мог бы изменить на просто файл и через поля структур достигать тоже самое но тут сложность именно с контетом идет
 
 func (s *FileService) UploadFile(ctx context.Context, userID uuid.UUID, fileName string, content io.Reader) (*domain.FileMetadata, error) {
 	if _, err := os.Stat(s.storagePath); os.IsNotExist(err) {
@@ -86,9 +84,35 @@ func (s *FileService) DownloadFile(ctx context.Context, id uuid.UUID) (*domain.F
 
 }
 
-func (s *FileService) ConvertImageToPDF(inputPath string, outputPath string) error {
+func (s *FileService) StartImageToPDF(ctx context.Context, fileID uuid.UUID) error {
+	if s.wp == nil {
+		return errors.New("worker pool is not initialized")
+	}
+
+	file, err := s.fileRepo.GetByID(ctx, fileID)
+	if err != nil {
+		return err
+	}
+
+	task := &ConvertTask{
+		service:    s,
+		InputPath:  file.Path,
+		OutputPath: file.Path + ".pdf",
+	}
+
+	s.wp.Submit(task)
+
+	return nil
+}
+
+func (s *FileService) ConvertImageToPDF(ctx context.Context, inputPath string, outputPath string) error {
 	if _, err := os.Stat(inputPath); os.IsNotExist(err) {
 		return fmt.Errorf("input path does not exist: %s , err : %s", inputPath, err)
+	}
+
+	outputDir := filepath.Dir(outputPath)
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return fmt.Errorf("create output dir err: %w", err)
 	}
 
 	pdf := gofpdf.New("P", "mm", "A4", "")
@@ -96,11 +120,6 @@ func (s *FileService) ConvertImageToPDF(inputPath string, outputPath string) err
 
 	pdf.Image(inputPath, 10, 10, 190, 0, false, "", 0, "")
 
-	err := pdf.OutputFileAndClose(outputPath)
-	if err != nil {
-		return fmt.Errorf("output file error: %w", err)
-	}
-
-	return nil
+	return pdf.OutputFileAndClose(outputPath)
 
 }

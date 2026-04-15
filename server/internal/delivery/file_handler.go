@@ -66,3 +66,19 @@ func (h *Handler) Download(c *gin.Context) {
 
 	c.File(fileMeta.Path)
 }
+
+func (h *Handler) Execute(c *gin.Context) {
+	fileIDstr := c.Param("id")
+
+	fileId, err := uuid.Parse(fileIDstr)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "invalid file id"})
+		return
+	}
+
+	if err := h.fileService.StartImageToPDF(c.Request.Context(), fileId); err != nil {
+		c.JSON(500, gin.H{"error": "couldn't start the image"})
+		return
+	}
+
+}

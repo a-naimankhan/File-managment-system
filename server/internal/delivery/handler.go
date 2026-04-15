@@ -9,10 +9,11 @@ import (
 type Handler struct {
 	userService domain.UserService
 	fileService domain.FileService
+	jwtSecret   string
 }
 
-func NewHandler(uS domain.UserService, fS domain.FileService) *Handler {
-	return &Handler{userService: uS, fileService: fS}
+func NewHandler(uS domain.UserService, fS domain.FileService, jwtSecret string) *Handler {
+	return &Handler{userService: uS, fileService: fS, jwtSecret: jwtSecret}
 }
 
 func (h *Handler) InitRouter() *gin.Engine {
@@ -20,31 +21,34 @@ func (h *Handler) InitRouter() *gin.Engine {
 
 	api := r.Group("/api")
 	{
+		// Публичные руты
 		auth := api.Group("/auth")
 		{
 			auth.POST("/register", h.Register)
 			auth.POST("/login", h.Login)
 		}
 
-		files := api.Group("/files", h.userIdentify)
+		// Защищенные руты (нужен токен)
+		// Добавляем миддлварь на всю группу
+		protected := api.Group("/", h.userIdentify)
 		{
-			files.POST("/upload", h.Upload)
-			files.GET("/:id", h.Download)
+			files := protected.Group("/files")
+			{
+				files.POST("/upload", h.Upload)
+				files.GET("/:id", h.Download)
+			}
+
+			converts := protected.Group("/convert")
+			{
+				converts.POST("/img-pdf/:id", h.Execute)
+			}
 		}
 
 		tests := api.Group("/test")
 		{
 			tests.GET("/ping", h.Ping)
 		}
-		//TODO write handlers for those endpoints
-		//
-		converts := api.Group("/convert"){
-			converts.GET("/" , toFill)
 
-			converts.POST("/img-pdf" , toFill)
-			converts.POST("pdf-img" , toFill)
-		}
 	}
-
 	return r
 }

@@ -22,7 +22,7 @@ func (h *Handler) userIdentify(c *gin.Context) {
 	}
 
 	token, err := jwt.Parse(headerParts[1], func(token *jwt.Token) (interface{}, error) {
-		return []byte("jwt-secret"), nil
+		return []byte(h.jwtSecret), nil
 	})
 
 	if err != nil {
@@ -37,9 +37,15 @@ func (h *Handler) userIdentify(c *gin.Context) {
 	}
 	c.Set("username", claims["username"])
 
-	userID, ok := claims["sub"].(string)
+	subClaim, ok := claims["sub"]
 	if !ok {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "user id not found in token"})
+		return
+	}
+
+	userID, ok := subClaim.(string)
+	if !ok || userID == "" {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid user id in token"})
 		return
 	}
 

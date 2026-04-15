@@ -9,7 +9,7 @@
 /server/cmd/upload/    # Игнорируем ту самую папку с загрузками
 /server/cmd/server.exe # Если скомпилил бинарник в cmd
 vendor/
-.env
+server/.env
 
 
 #DB
