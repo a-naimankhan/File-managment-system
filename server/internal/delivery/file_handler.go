@@ -51,11 +51,12 @@ func (h *Handler) Upload(c *gin.Context) {
 
 func (h *Handler) Download(c *gin.Context) {
 
-	fileIDStr := c.PostForm("id")
+	fileIDStr := c.Param("id")
 	fileID, err := uuid.Parse(fileIDStr)
 
 	if err != nil {
 		c.JSON(400, gin.H{"error": "invalid file id"})
+		return
 	}
 
 	fileMeta, err := h.fileService.DownloadFile(c.Request.Context(), fileID)

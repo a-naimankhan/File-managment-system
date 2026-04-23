@@ -9,6 +9,7 @@ import (
 type registerRequest struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
+	Email    string `json:"email" binding:"required"`
 }
 
 func (h *Handler) Register(c *gin.Context) {
@@ -18,7 +19,7 @@ func (h *Handler) Register(c *gin.Context) {
 		return
 	}
 
-	user, err := h.userService.Register(c.Request.Context(), req.Username, req.Password)
+	user, err := h.userService.Register(c.Request.Context(), req.Username, req.Password, req.Email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -79,7 +79,7 @@ Personal pet project: **clean architecture**, **performance**, **Google Drive–
 
 ## Technical Debt
 
-- [ ] **Does not compile:** [`handler.go`](server/internal/delivery/handler.go) syntax + `toFill` placeholders.
+- [ done ] **Does not compile:** [`handler.go`](server/internal/delivery/handler.go) syntax + `toFill` placeholders.
 - [ ] **Duplicate `main`:** [`server/cmd/main.go`](server/cmd/main.go) vs [`server/cmd/app.go`](server/cmd/app.go).
 - [ ] **Handler bugs:** [`Register`/`Login`](server/internal/delivery/user_handler.go) missing `return` after error responses (double `JSON` write risk); [`Download`](server/internal/delivery/file_handler.go) wrong input binding + missing return on parse error.
 - [ ] **Security:** JWT verify secret mismatch; leaking internal errors to clients in some paths; no refresh token / token revocation.

@@ -4,6 +4,7 @@ import (
 	"File-management-system/server/internal/domain"
 	"context"
 	"errors"
+	"net/mail"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -23,7 +24,7 @@ func NewUserService(repo domain.UserRepository, jwtS string) domain.UserService 
 	}
 }
 
-func (s *userService) Register(ctx context.Context, username, password string) (*domain.User, error) {
+func (s *userService) Register(ctx context.Context, username, password, email string) (*domain.User, error) {
 	if len(username) < 3 {
 		return nil, errors.New("username too short")
 	}
@@ -32,9 +33,19 @@ func (s *userService) Register(ctx context.Context, username, password string) (
 		return nil, errors.New("password too short")
 	}
 
-	existing, _ := s.userRepo.GetByUsername(ctx, username)
-	if existing != nil {
+	existingUsername, _ := s.userRepo.GetByUsername(ctx, username)
+	if existingUsername != nil {
 		return nil, errors.New("username already exists")
+	}
+
+	_, err := mail.ParseAddress(email)
+	if err != nil {
+		return nil, errors.New("invalid email format")
+	}
+
+	existingEmail, _ := s.userRepo.GetByEmail(ctx, email)
+	if existingEmail != nil {
+		return nil, errors.New("email already in use")
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -46,6 +57,7 @@ func (s *userService) Register(ctx context.Context, username, password string) (
 		ID:           uuid.New(),
 		Username:     username,
 		PasswordHash: string(hashedPassword),
+		Email:        email,
 	}
 
 	err = s.userRepo.Save(ctx, newUser)

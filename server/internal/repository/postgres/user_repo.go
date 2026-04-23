@@ -55,3 +55,22 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (*domain.
 
 	return &u, nil
 }
+
+func (r *userRepo) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
+	var user domain.User
+
+	err := r.db.QueryRowContext(ctx,
+		"SELECT id, username, password_hash, email FROM users WHERE email = $1",
+		email,
+	).Scan(&user.ID, &user.Username, &user.PasswordHash, &user.Email)
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, err
+}
