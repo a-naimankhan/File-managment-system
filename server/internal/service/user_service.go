@@ -67,8 +67,6 @@ func (s *userService) Login(ctx context.Context, username, password string) (str
 	if err != nil {
 		return "", errors.New("invalid password")
 	}
-	//tut еще отдаю токен и разрешаю входить в систему
-	//ну а пока временный костыль
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub":      user.ID.String(),

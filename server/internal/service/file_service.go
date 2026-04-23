@@ -84,6 +84,13 @@ func (s *FileService) DownloadFile(ctx context.Context, id uuid.UUID) (*domain.F
 
 }
 
+func (s *FileService) DeleteFile(ctx context.Context, id uuid.UUID) error {
+	if err := s.fileRepo.DeleteByID(ctx, id); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *FileService) StartImageToPDF(ctx context.Context, fileID uuid.UUID) error {
 	if s.wp == nil {
 		return errors.New("worker pool is not initialized")
