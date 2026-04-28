@@ -30,6 +30,7 @@ func startServer(cfg *config.Config) {
 	if err != nil {
 		panic("Failed to connect to database")
 	}
+
 	userRepo := postgres.NewUserRepo(db)
 	fileRepo := postgres.NewFileRepo(db)
 

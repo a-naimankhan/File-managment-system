@@ -69,3 +69,26 @@ func (r *fileRepository) DeleteByID(ctx context.Context, id uuid.UUID) error {
 	}
 
 }
+
+func (r *fileRepository) ListByUserId(ctx context.Context, userID uuid.UUID) ([]*domain.FileMetadata, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	var userFiles []*domain.FileMetadata
+
+	_, exists := r.files[userID]
+	if !exists {
+		return userFiles, nil
+	}
+
+	for _, f := range r.files {
+		if f.UserID == userID {
+			userFiles = append(userFiles, f)
+		}
+	}
+
+	if len(userFiles) == 0 {
+		return []*domain.FileMetadata{}, errors.New("empty list of files") //или эта хуйня должна быть в сервисе наверное хз?
+	}
+	return userFiles, nil
+}

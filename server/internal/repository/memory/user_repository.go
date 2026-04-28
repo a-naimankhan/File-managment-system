@@ -40,7 +40,20 @@ func (r *userRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.Use
 		return u, nil
 	}
 	//somehow have to think about returning err if it nil for example
-	return nil, errors.New("user not found")
+	return nil, errors.New("user with that ID not found")
+}
+
+func (r *userRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	for _, u := range r.users {
+		if u.Email == email {
+			return u, nil
+		}
+	}
+
+	return nil, nil
 }
 
 func (r *userRepository) GetByUsername(ctx context.Context, username string) (*domain.User, error) {
@@ -52,5 +65,5 @@ func (r *userRepository) GetByUsername(ctx context.Context, username string) (*d
 			return u, nil
 		}
 	}
-	return nil, errors.New("user not found")
+	return nil, errors.New("user with that name not found")
 }
