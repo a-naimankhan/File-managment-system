@@ -65,6 +65,7 @@ func (s *FileService) UploadFile(ctx context.Context, userID uuid.UUID, fileName
 		Filename:   fileName,
 		StoredName: storedName,
 		Size:       size,
+		Path:       finalPath,
 	}
 
 	if err := s.fileRepo.Save(ctx, metadata); err != nil {
