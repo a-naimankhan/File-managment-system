@@ -111,6 +111,18 @@ func (h *Handler) ListFiles(c *gin.Context) {
 }
 
 func (h *Handler) DeleteFile(c *gin.Context) {
+	val, exist := c.Get("userID")
+	if !exist {
+		c.JSON(401, gin.H{"error": "user not found in context"})
+		return
+	}
+
+	userId, err := uuid.Parse(val.(string))
+	if err != nil {
+		c.JSON(400, gin.H{"error": "invalid user id format"})
+		return
+	}
+
 	fileIDStr := c.Param("id")
 	fileID, err := uuid.Parse(fileIDStr)
 	if err != nil {
@@ -118,7 +130,11 @@ func (h *Handler) DeleteFile(c *gin.Context) {
 		return
 	}
 
-	if err := h.fileService.DeleteFile(c.Request.Context(), fileID); err != nil {
+	if err := h.fileService.DeleteFile(c.Request.Context(), userId, fileID); err != nil {
+		if err.Error() == "access denied" {
+			c.JSON(403, gin.H{"error": "access denied"})
+			return
+		}
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}

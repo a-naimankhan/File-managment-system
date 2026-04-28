@@ -29,15 +29,15 @@ func (h *Handler) InitRouter() *gin.Engine {
 		}
 
 		// Защищенные руты (нужен токен)
-		// Добавляем миддлварь на всю группу
+		// Добавляем миддлвеер на всю группу
 		protected := api.Group("/", h.userIdentify)
 		{
 			files := protected.Group("/files")
 			{
 				files.POST("/upload", h.Upload)
 				files.GET("/:id", h.Download)
-				files.GET(, h.ListFiles)
-				files.DELETE("/:id", h.DeleteByID)
+				files.GET("/", h.ListFiles)
+				files.DELETE("/:id", h.DeleteFile)
 			}
 
 			converts := protected.Group("/convert")

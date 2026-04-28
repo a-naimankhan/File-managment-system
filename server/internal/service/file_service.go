@@ -85,10 +85,15 @@ func (s *FileService) DownloadFile(ctx context.Context, id uuid.UUID) (*domain.F
 
 }
 
-func (s *FileService) DeleteFile(ctx context.Context, id uuid.UUID) error {
+func (s *FileService) DeleteFile(ctx context.Context, userId, id uuid.UUID) error {
 	file, err := s.fileRepo.GetByID(ctx, id)
 	if err != nil {
 		return errors.New("file not found")
+	}
+
+	//ownership check
+	if file.UserID != userId {
+		return errors.New("access denied")
 	}
 
 	//remove from local
