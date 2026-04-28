@@ -36,12 +36,12 @@ func startServer(cfg *config.Config) {
 	//fileRepo := memory.NewFileRepository()
 
 	userSvc := service.NewUserService(userRepo, cfg.JWTSECRET)
-	workerPool := worker.NewPool(5) //IN future increase number of workers as tasks get higher
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	workerPool.Start(context.Background())
+	workerPool := worker.NewPool(5) //IN future increase number of workers as tasks get higher
+	workerPool.Start(ctx)
 
 	fileSvc := service.NewFileService(fileRepo, userRepo, cfg.StoragePath, workerPool)
 
