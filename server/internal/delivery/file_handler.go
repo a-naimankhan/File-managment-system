@@ -82,3 +82,47 @@ func (h *Handler) Execute(c *gin.Context) {
 
 	c.JSON(200, gin.H{"message": "conversion started"})
 }
+
+func (h *Handler) ListFiles(c *gin.Context) {
+	val, exists := c.Get("userID")
+	if !exists {
+		c.JSON(401, gin.H{"error": "user not found in context"})
+		return
+	}
+	userIDStr, ok := val.(string)
+	if !ok {
+		c.JSON(400, gin.H{"error": "internal error : user id format"})
+		return
+	}
+
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "invalid user id format"})
+		return
+	}
+
+	files, err := h.fileService.ListFiles(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(200, files)
+
+}
+
+func (h *Handler) DeleteFile(c *gin.Context) {
+	fileIDStr := c.Param("id")
+	fileID, err := uuid.Parse(fileIDStr)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "invalid file id"})
+		return
+	}
+
+	if err := h.fileService.DeleteFile(c.Request.Context(), fileID); err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(200, gin.H{"message": "file deleted"})
+
+}

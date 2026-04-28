@@ -36,6 +36,8 @@ func (h *Handler) InitRouter() *gin.Engine {
 			{
 				files.POST("/upload", h.Upload)
 				files.GET("/:id", h.Download)
+				files.GET(, h.ListFiles)
+				files.DELETE("/:id", h.DeleteByID)
 			}
 
 			converts := protected.Group("/convert")

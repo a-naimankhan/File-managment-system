@@ -46,3 +46,25 @@ func (r *fileRepo) DeleteByID(ctx context.Context, id uuid.UUID) error {
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err
 }
+
+func (r *fileRepo) ListByUserId(ctx context.Context, userID uuid.UUID) ([]*domain.FileMetadata, error) {
+	query := "SELECT id , user_id , filename , stored_name , size , path FROM file_metadata WHERE user_id = $1"
+
+	rows, err := r.db.QueryContext(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var files []*domain.FileMetadata
+	for rows.Next() {
+		f := &domain.FileMetadata{}
+		err := rows.Scan(&f.ID, &f.UserID, &f.Filename, &f.StoredName, &f.Size, &f.Path)
+		if err != nil {
+			return nil, err
+		}
+		files = append(files, f)
+	}
+
+	return files, nil
+}

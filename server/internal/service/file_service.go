@@ -86,9 +86,21 @@ func (s *FileService) DownloadFile(ctx context.Context, id uuid.UUID) (*domain.F
 }
 
 func (s *FileService) DeleteFile(ctx context.Context, id uuid.UUID) error {
+	file, err := s.fileRepo.GetByID(ctx, id)
+	if err != nil {
+		return errors.New("file not found")
+	}
+
+	//remove from local
+	if err := os.Remove(file.Path); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("delete file failed: %w", err)
+	}
+
+	//remove from db
 	if err := s.fileRepo.DeleteByID(ctx, id); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -130,4 +142,14 @@ func (s *FileService) ConvertImageToPDF(ctx context.Context, inputPath string, o
 
 	return pdf.OutputFileAndClose(outputPath)
 
+}
+
+func (s *FileService) ListFiles(ctx context.Context, userID uuid.UUID) ([]*domain.FileMetadata, error) {
+	files, err := s.fileRepo.ListByUserId(ctx, userID)
+	//ну временно ну атак это Transform part поидее если думать что это ETL
+	if err != nil {
+		return nil, err
+	}
+
+	return files, nil
 }
