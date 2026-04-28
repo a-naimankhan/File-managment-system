@@ -1,8 +1,6 @@
 package delivery
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -45,7 +43,7 @@ func (h *Handler) Upload(c *gin.Context) {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	fmt.Println(metadata)
+
 	c.JSON(200, metadata)
 }
 
@@ -82,4 +80,5 @@ func (h *Handler) Execute(c *gin.Context) {
 		return
 	}
 
+	c.JSON(200, gin.H{"message": "conversion started"})
 }
