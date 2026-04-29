@@ -48,39 +48,70 @@ func (h *Handler) Upload(c *gin.Context) {
 }
 
 func (h *Handler) Download(c *gin.Context) {
-
-	fileIDStr := c.Param("id")
-	fileID, err := uuid.Parse(fileIDStr)
-
-	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid file id"})
+	val, exists := c.Get("userID")
+	if !exists {
+		c.JSON(401, gin.H{"error": "user not found in context"})
 		return
 	}
 
-	fileMeta, err := h.fileService.DownloadFile(c.Request.Context(), fileID)
+	userId, err := uuid.Parse(val.(string))
 	if err != nil {
-		c.JSON(404, gin.H{"error": "File not found"})
+		c.JSON(400, gin.H{"error": "internal error : user id format"})
+		return
+	}
+
+	fileIdStr := c.Param("file")
+	fileId, err := uuid.Parse(fileIdStr)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "internal error : file id format"})
+		return
+	}
+
+	fileMeta, err := h.fileService.DownloadFile(c.Request.Context(), userId, fileId)
+	if err != nil {
+		if err.Error() == "access denied" {
+			c.JSON(403, gin.H{"error": "access denied"})
+			return
+		}
+		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.File(fileMeta.Path)
+
 }
 
 func (h *Handler) Execute(c *gin.Context) {
-	fileIDstr := c.Param("id")
-
-	fileId, err := uuid.Parse(fileIDstr)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid file id"})
+	val, exists := c.Get("userID")
+	if !exists {
+		c.JSON(401, gin.H{"error": "user not found in context"})
 		return
 	}
 
-	if err := h.fileService.StartImageToPDF(c.Request.Context(), fileId); err != nil {
-		c.JSON(500, gin.H{"error": "couldn't start the image"})
+	userId, err := uuid.Parse(val.(string))
+	if err != nil {
+		c.JSON(400, gin.H{"error": "internal error : user id format"})
+		return
+	}
+
+	fileIdStr := c.Param("file")
+	fileId, err := uuid.Parse(fileIdStr)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "internal error : file id format"})
+		return
+	}
+
+	if err := h.fileService.StartImageToPDF(c.Request.Context(), userId, fileId); err != nil {
+		if err.Error() == "access denied" {
+			c.JSON(403, gin.H{"error": "access denied"})
+			return
+		}
+		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(200, gin.H{"message": "conversion started"})
+
 }
 
 func (h *Handler) ListFiles(c *gin.Context) {

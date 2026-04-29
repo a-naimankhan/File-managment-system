@@ -47,7 +47,7 @@ func (r *fileRepo) DeleteByID(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
-func (r *fileRepo) ListByUserId(ctx context.Context, userID uuid.UUID) ([]*domain.FileMetadata, error) {
+func (r *fileRepo) ListByUserID(ctx context.Context, userID uuid.UUID) ([]*domain.FileMetadata, error) {
 	query := "SELECT id , user_id , filename , stored_name , size , path FROM file_metadata WHERE user_id = $1"
 
 	rows, err := r.db.QueryContext(ctx, query, userID)
