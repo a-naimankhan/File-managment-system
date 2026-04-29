@@ -42,6 +42,10 @@ func (h *Handler) Login(c *gin.Context) {
 	//getting the token from the login
 	tkn, err := h.userService.Login(c.Request.Context(), req.Username, req.Password)
 	if err != nil {
+		if err.Error() == "user not found" || err.Error() == "invalid password" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
