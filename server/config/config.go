@@ -10,6 +10,8 @@ type Config struct {
 }
 
 func LoadConfig() (*Config, error) {
+
+	viper.AddConfigPath(".")
 	viper.AddConfigPath("../")
 	viper.SetConfigName(".env")
 	viper.SetConfigType("env")
