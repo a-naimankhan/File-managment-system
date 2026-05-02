@@ -45,6 +45,11 @@ func (p *Pool) Start(ctx context.Context) {
 }
 
 func (p *Pool) Submit(task Task) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("worker pool is closed , task dropped : %v", r)
+		}
+	}()
 	p.tasks <- task
 }
 
