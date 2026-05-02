@@ -86,7 +86,7 @@ func (s *FileService) DownloadFile(ctx context.Context, userId, id uuid.UUID) (*
 	}
 
 	if file.UserID != userId {
-		return nil, errors.New("wrong user id")
+		return nil, errors.New("access denied")
 	}
 
 	return file, nil
