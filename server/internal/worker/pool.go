@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"log"
+	"sync"
 )
 
 type Task interface {
@@ -11,6 +12,8 @@ type Task interface {
 
 type Pool struct {
 	tasks       chan Task
+	closed      bool
+	mu          sync.Mutex
 	workerCount int
 }
 
@@ -45,14 +48,20 @@ func (p *Pool) Start(ctx context.Context) {
 }
 
 func (p *Pool) Submit(task Task) {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Printf("worker pool is closed , task dropped : %v", r)
-		}
-	}()
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	if p.closed {
+		log.Println("worker is closed task is dropped")
+		return
+	}
 	p.tasks <- task
 }
 
 func (p *Pool) Stop() {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	p.closed = true
 	close(p.tasks)
 }
