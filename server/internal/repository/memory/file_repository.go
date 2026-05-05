@@ -70,7 +70,7 @@ func (r *fileRepository) DeleteByID(ctx context.Context, id uuid.UUID) error {
 
 }
 
-func (r *fileRepository) ListByUserId(ctx context.Context, userID uuid.UUID) ([]*domain.FileMetadata, error) {
+func (r *fileRepository) ListByUserID(ctx context.Context, userID uuid.UUID) ([]*domain.FileMetadata, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 

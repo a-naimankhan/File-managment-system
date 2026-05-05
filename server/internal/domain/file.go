@@ -9,15 +9,16 @@ import (
 )
 
 type FileMetadata struct {
-	ID         uuid.UUID `db:"id" json:"id"`
-	UserID     uuid.UUID `db:"user_id" json:"user_id"`
-	Filename   string    `db:"filename" json:"filename"`
-	StoredName string    `db:"stored_name" json:"-"`
-	Path       string    `db:"path" json:"path"`
-	Size       int64     `db:"size" json:"size"`
-	MimeType   string    `db:"mime_type" json:"mime_type"`
-	Checksum   string    `db:"checksum" json:"checksum"`
-	CreatedAt  time.Time `db:"created_at" json:"created_at"`
+	ID         uuid.UUID  `db:"id" json:"id"`
+	UserID     uuid.UUID  `db:"user_id" json:"user_id"`
+	FolderID   *uuid.UUID `db:"folder_id" json:"folder_id"`
+	Filename   string     `db:"filename" json:"filename"`
+	StoredName string     `db:"stored_name" json:"-"`
+	Path       string     `db:"path" json:"path"`
+	Size       int64      `db:"size" json:"size"`
+	MimeType   string     `db:"mime_type" json:"mime_type"`
+	Checksum   string     `db:"checksum" json:"checksum"`
+	CreatedAt  time.Time  `db:"created_at" json:"created_at"`
 }
 
 type FileRepository interface {
