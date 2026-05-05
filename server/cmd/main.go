@@ -33,6 +33,7 @@ func startServer(cfg *config.Config) {
 
 	userRepo := postgres.NewUserRepo(db)
 	fileRepo := postgres.NewFileRepo(db)
+	folderRepo := postgres.NewFolderRepo(db)
 
 	//userRepo := memory.NewUserRepository()
 	//fileRepo := memory.NewFileRepository()
@@ -46,8 +47,9 @@ func startServer(cfg *config.Config) {
 	workerPool.Start(ctx)
 
 	fileSvc := service.NewFileService(fileRepo, userRepo, cfg.StoragePath, workerPool)
+	folderSvc := service.NewFolderService(folderRepo, fileRepo)
 
-	h := delivery.NewHandler(userSvc, fileSvc, cfg.JWTSECRET)
+	h := delivery.NewHandler(userSvc, fileSvc, folderSvc, cfg.JWTSECRET)
 
 	router := h.InitRouter()
 
