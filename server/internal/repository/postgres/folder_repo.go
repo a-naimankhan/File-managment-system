@@ -13,12 +13,12 @@ type folderRepo struct {
 	db *sqlx.DB
 }
 
-func newFolderRepo(db *sqlx.DB) *folderRepo {
+func NewFolderRepo(db *sqlx.DB) *folderRepo {
 	return &folderRepo{db: db}
 }
 
 func (r *folderRepo) Save(ctx context.Context, folder *domain.Folder) error {
-	query := `INSERT INTO folders (id , user_id , parent_id , name , created_at) VALUES($1 , $2 , $3 , $4 , %5)`
+	query := `INSERT INTO folders (id , user_id , parent_id , name , created_at) VALUES($1 , $2 , $3 , $4 , $5)`
 	_, err := r.db.ExecContext(ctx, query, folder.ID, folder.UserID, folder.ParentID, folder.Name, folder.CreatedAt)
 	return err
 }

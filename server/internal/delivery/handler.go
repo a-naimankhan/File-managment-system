@@ -7,13 +7,14 @@ import (
 )
 
 type Handler struct {
-	userService domain.UserService
-	fileService domain.FileService
-	jwtSecret   string
+	userService   domain.UserService
+	fileService   domain.FileService
+	folderService domain.FolderService
+	jwtSecret     string
 }
 
-func NewHandler(uS domain.UserService, fS domain.FileService, jwtSecret string) *Handler {
-	return &Handler{userService: uS, fileService: fS, jwtSecret: jwtSecret}
+func NewHandler(uS domain.UserService, fS domain.FileService, folderS domain.FolderService, jwtSecret string) *Handler {
+	return &Handler{userService: uS, fileService: fS, folderService: folderS, jwtSecret: jwtSecret}
 }
 
 func (h *Handler) InitRouter() *gin.Engine {
@@ -39,6 +40,15 @@ func (h *Handler) InitRouter() *gin.Engine {
 				files.GET("/", h.ListFiles)
 				files.DELETE("/:id", h.DeleteFile)
 			}
+
+			folders := protected.Group("/folders")
+			{
+				folders.POST("/", h.CreateFolder)
+				folders.DELETE("/:id", h.DeleteFolder)
+				folders.PATCH("/:id/rename", h.RenameFolder)
+			}
+
+			protected.GET("/tree", h.ListContents)
 
 			converts := protected.Group("/convert")
 			{
