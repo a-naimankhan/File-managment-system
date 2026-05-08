@@ -31,6 +31,17 @@ func (h *Handler) Upload(c *gin.Context) {
 		c.JSON(400, gin.H{"error": "internal error : user id format"})
 		return
 	}
+
+	var folderID *uuid.UUID
+	folderIDstr := c.PostForm("folder_id")
+	if folderIDstr != "" {
+		parsed, err := uuid.Parse(folderIDstr)
+		if err != nil {
+			c.JSON(400, gin.H{"error": "internal error : folder id format"})
+			return
+		}
+		folderID = &parsed
+	}
 	fileContent, err := fileHeader.Open()
 	if err != nil {
 		c.JSON(500, gin.H{"error": "couldn't open the file"})
@@ -38,7 +49,7 @@ func (h *Handler) Upload(c *gin.Context) {
 	}
 	defer fileContent.Close()
 
-	metadata, err := h.fileService.UploadFile(c.Request.Context(), userID, fileHeader.Filename, fileContent)
+	metadata, err := h.fileService.UploadFile(c.Request.Context(), userID, fileHeader.Filename, folderID, fileContent)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return

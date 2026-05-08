@@ -99,16 +99,19 @@ func (h *Handler) RenameFolder(c *gin.Context) {
 		return
 	}
 
-	folderID, err := uuid.Parse(c.Param("folder_id"))
-	fmt.Println("id param:", c.Param("id"))
-	fmt.Println("full path:", c.FullPath())
+	folderID, err := uuid.Parse(c.Param("id"))
+	//fmt.Println("id param:", c.Param("folder_id"))
 	if err != nil {
+		//fmt.Println("parsing error : ", err.Error())
+		//fmt.Printf("type of folderId is : %T\n", folderID)
+		//fmt.Println("Folder id itself : ", folderID)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	var req renameFolderRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		fmt.Println("bind error:", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

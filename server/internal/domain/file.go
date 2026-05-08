@@ -29,7 +29,7 @@ type FileRepository interface {
 }
 
 type FileService interface {
-	UploadFile(ctx context.Context, userID uuid.UUID, fileName string, content io.Reader) (*FileMetadata, error)
+	UploadFile(ctx context.Context, userID uuid.UUID, fileName string, folderID *uuid.UUID, content io.Reader) (*FileMetadata, error)
 	DownloadFile(ctx context.Context, userId, id uuid.UUID) (*FileMetadata, error)
 	DeleteFile(ctx context.Context, userId, fileId uuid.UUID) error
 	StartImageToPDF(ctx context.Context, userId, id uuid.UUID) error

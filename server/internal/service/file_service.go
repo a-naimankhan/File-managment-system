@@ -30,7 +30,7 @@ func NewFileService(fRepo domain.FileRepository, uRepo domain.UserRepository, pa
 	}
 }
 
-func (s *FileService) UploadFile(ctx context.Context, userID uuid.UUID, fileName string, content io.Reader) (*domain.FileMetadata, error) {
+func (s *FileService) UploadFile(ctx context.Context, userID uuid.UUID, fileName string, folderID *uuid.UUID, content io.Reader) (*domain.FileMetadata, error) {
 	if _, err := os.Stat(s.storagePath); os.IsNotExist(err) {
 		err := os.MkdirAll(s.storagePath, 0755)
 		if err != nil {
@@ -62,6 +62,7 @@ func (s *FileService) UploadFile(ctx context.Context, userID uuid.UUID, fileName
 	metadata := &domain.FileMetadata{
 		ID:         uuid.New(),
 		UserID:     userID,
+		FolderID:   folderID,
 		Filename:   fileName,
 		StoredName: storedName,
 		Size:       size,
