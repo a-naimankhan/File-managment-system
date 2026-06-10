@@ -19,8 +19,8 @@ func NewFileRepo(db *sqlx.DB) *fileRepo {
 }
 
 func (r *fileRepo) Save(ctx context.Context, meta *domain.FileMetadata) error {
-	query := `INSERT INTO file_metadata (id, user_id, filename, stored_name, path, size, mime_type, checksum, created_at) 
-              VALUES (:id, :user_id, :filename, :stored_name, :path, :size, :mime_type, :checksum, :created_at)`
+	query := `INSERT INTO file_metadata (id, user_id, folder_id , filename, stored_name, path, size, mime_type, checksum, created_at) 
+              VALUES (:id, :user_id, :folder_id, :filename, :stored_name, :path, :size, :mime_type, :checksum, :created_at)`
 
 	_, err := r.db.NamedExecContext(ctx, query, meta)
 	return err
@@ -48,7 +48,7 @@ func (r *fileRepo) DeleteByID(ctx context.Context, id uuid.UUID) error {
 }
 
 func (r *fileRepo) ListByUserID(ctx context.Context, userID uuid.UUID) ([]*domain.FileMetadata, error) {
-	query := "SELECT id , user_id , filename , stored_name , size , path FROM file_metadata WHERE user_id = $1"
+	query := "SELECT id , user_id , folder_id , filename , stored_name , size , path FROM file_metadata WHERE user_id = $1"
 
 	rows, err := r.db.QueryContext(ctx, query, userID)
 	if err != nil {
@@ -59,12 +59,14 @@ func (r *fileRepo) ListByUserID(ctx context.Context, userID uuid.UUID) ([]*domai
 	var files []*domain.FileMetadata
 	for rows.Next() {
 		f := &domain.FileMetadata{}
-		err := rows.Scan(&f.ID, &f.UserID, &f.Filename, &f.StoredName, &f.Size, &f.Path)
+		err := rows.Scan(&f.ID, &f.UserID, &f.FolderID, &f.Filename, &f.StoredName, &f.Size, &f.Path)
 		if err != nil {
 			return nil, err
 		}
 		files = append(files, f)
 	}
-
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
 	return files, nil
 }

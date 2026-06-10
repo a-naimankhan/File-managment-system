@@ -35,16 +35,18 @@ func (r *folderRepo) GetByID(ctx context.Context, id uuid.UUID) (*domain.Folder,
 	return folder, err
 }
 
-func (r *folderRepo) ListByParentID(ctx context.Context, userID uuid.UUID, parentID *uuid.UUID) ([]*domain.Folder, error) {
+func (r *folderRepo) ListByParentID(ctx context.Context, userID uuid.UUID, folderID *uuid.UUID) ([]*domain.Folder, error) {
 	var rows *sql.Rows
 	var err error
 
-	if parentID == nil {
-		query := `SELECT id, user_id, parent_id, name, created_at FROM folders WHERE user_id = $1 AND parent_id IS NULL`
+	if folderID == nil {
+		query := `SELECT id, user_id, folder_id, filename, stored_name, size, path, mime_type, checksum, created_at 
+                 FROM file_metadata WHERE user_id = $1 AND folder_id IS NULL`
 		rows, err = r.db.QueryContext(ctx, query, userID)
 	} else {
-		query := `SELECT id, user_id, parent_id, name, created_at FROM folders WHERE user_id = $1 AND parent_id = $2`
-		rows, err = r.db.QueryContext(ctx, query, userID, parentID)
+		query := `SELECT id, user_id, folder_id, filename, stored_name, size, path, mime_type, checksum, created_at 
+                 FROM file_metadata WHERE user_id = $1 AND folder_id = $2`
+		rows, err = r.db.QueryContext(ctx, query, userID, folderID)
 	}
 
 	if err != nil {
@@ -59,6 +61,9 @@ func (r *folderRepo) ListByParentID(ctx context.Context, userID uuid.UUID, paren
 			return nil, err
 		}
 		folders = append(folders, f)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
 	return folders, nil
