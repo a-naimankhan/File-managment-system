@@ -165,7 +165,6 @@ func (s *FileService) ConvertImageToPDF(ctx context.Context, inputPath string, o
 
 func (s *FileService) ListFiles(ctx context.Context, userID uuid.UUID) ([]*domain.FileMetadata, error) {
 	files, err := s.fileRepo.ListByUserID(ctx, userID)
-	//ну временно ну атак это Transform part поидее если думать что это ETL
 	if err != nil {
 		return nil, err
 	}

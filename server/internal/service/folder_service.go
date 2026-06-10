@@ -57,7 +57,7 @@ func (s *FolderService) DeleteFolder(ctx context.Context, userID, folderID uuid.
 		return errors.New("folder not found")
 	}
 
-	if folderID != userID {
+	if folder.UserID != userID {
 		return errors.New("access denied")
 	}
 
