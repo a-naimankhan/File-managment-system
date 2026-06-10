@@ -71,7 +71,7 @@ func (h *Handler) Download(c *gin.Context) {
 		return
 	}
 
-	fileIdStr := c.Param("file")
+	fileIdStr := c.Param("id")
 	fileId, err := uuid.Parse(fileIdStr)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "internal error : file id format"})
@@ -88,8 +88,7 @@ func (h *Handler) Download(c *gin.Context) {
 		return
 	}
 
-	c.File(fileMeta.Path)
-
+	c.FileAttachment(fileMeta.Path, fileMeta.Filename)
 }
 
 func (h *Handler) Execute(c *gin.Context) {
@@ -105,7 +104,7 @@ func (h *Handler) Execute(c *gin.Context) {
 		return
 	}
 
-	fileIdStr := c.Param("file")
+	fileIdStr := c.Param("id")
 	fileId, err := uuid.Parse(fileIdStr)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "internal error : file id format"})
