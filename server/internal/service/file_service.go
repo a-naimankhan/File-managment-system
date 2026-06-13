@@ -105,19 +105,16 @@ func (s *FileService) DeleteFile(ctx context.Context, userId, id uuid.UUID) erro
 		return errors.New("file not found")
 	}
 
-	//ownership check
 	if file.UserID != userId {
 		return errors.New("access denied")
 	}
 
-	//remove from local
-	if err := os.Remove(file.Path); err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("delete file failed: %w", err)
-	}
-
-	//remove from db
 	if err := s.fileRepo.DeleteByID(ctx, id); err != nil {
 		return err
+	}
+
+	if err := os.Remove(file.Path); err != nil && !os.IsNotExist(err) {
+		fmt.Printf("warning: failed to remove physical file %s: %v\n", file.Path, err)
 	}
 
 	return nil
