@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jung-kurt/gofpdf"
@@ -67,6 +68,9 @@ func (s *FileService) UploadFile(ctx context.Context, userID uuid.UUID, fileName
 		StoredName: storedName,
 		Size:       size,
 		Path:       finalPath,
+		MimeType:   "application/octet-stream",
+		Checksum:   "",
+		CreatedAt:  time.Now(),
 	}
 
 	if err := s.fileRepo.Save(ctx, metadata); err != nil {
