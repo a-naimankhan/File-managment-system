@@ -25,7 +25,7 @@ type FileRepository interface {
 	Save(ctx context.Context, file *FileMetadata) error
 	GetByID(ctx context.Context, id uuid.UUID) (*FileMetadata, error)
 	DeleteByID(ctx context.Context, id uuid.UUID) error
-	ListByUserID(ctx context.Context, userID uuid.UUID) ([]*FileMetadata, error)
+	ListByFolderID(ctx context.Context, userID uuid.UUID, folderID *uuid.UUID) ([]*FileMetadata, error)
 }
 
 type FileService interface {
@@ -33,5 +33,5 @@ type FileService interface {
 	DownloadFile(ctx context.Context, userId, id uuid.UUID) (*FileMetadata, error)
 	DeleteFile(ctx context.Context, userId, fileId uuid.UUID) error
 	StartImageToPDF(ctx context.Context, userId, id uuid.UUID) error
-	ListFiles(ctx context.Context, userID uuid.UUID) ([]*FileMetadata, error)
+	ListFiles(ctx context.Context, userID uuid.UUID, folderID *uuid.UUID) ([]*FileMetadata, error)
 }

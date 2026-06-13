@@ -88,19 +88,10 @@ func (s *FolderService) ListContents(ctx context.Context, userID uuid.UUID, pare
 		return nil, nil, err
 	}
 
-	files, err := s.fileRepo.ListByUserID(ctx, userID)
+	files, err := s.fileRepo.ListByFolderID(ctx, userID, parentID)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	var filtered []*domain.FileMetadata
-	for _, f := range files {
-		if parentID == nil && f.FolderID == nil {
-			filtered = append(filtered, f)
-		} else if parentID != nil && f.FolderID != nil && *f.FolderID == *parentID {
-			filtered = append(filtered, f)
-		}
-	}
-
-	return folders, filtered, nil
+	return folders, files, nil
 }

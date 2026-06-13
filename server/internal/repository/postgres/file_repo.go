@@ -47,10 +47,45 @@ func (r *fileRepo) DeleteByID(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
-func (r *fileRepo) ListByUserID(ctx context.Context, userID uuid.UUID) ([]*domain.FileMetadata, error) {
-	query := "SELECT id , user_id , folder_id , filename , stored_name , size , path FROM file_metadata WHERE user_id = $1"
+//will be needed if I want to count every file that user has
+//func (r *fileRepo) ListByUserID(ctx context.Context, userID uuid.UUID) ([]*domain.FileMetadata, error) {
+//	query := "SELECT id , user_id , folder_id , filename , stored_name , size , path FROM file_metadata WHERE user_id = $1"
+//
+//	rows, err := r.db.QueryContext(ctx, query, userID)
+//	if err != nil {
+//		return nil, err
+//	}
+//	defer rows.Close()
+//
+//	var files []*domain.FileMetadata
+//	for rows.Next() {
+//		f := &domain.FileMetadata{}
+//		err := rows.Scan(&f.ID, &f.UserID, &f.FolderID, &f.Filename, &f.StoredName, &f.Size, &f.Path)
+//		if err != nil {
+//			return nil, err
+//		}
+//		files = append(files, f)
+//	}
+//	if err := rows.Err(); err != nil {
+//		return nil, err
+//	}
+//	return files, nil
+//}
 
-	rows, err := r.db.QueryContext(ctx, query, userID)
+func (r *fileRepo) ListByFolderID(ctx context.Context, userID uuid.UUID, folderID *uuid.UUID) ([]*domain.FileMetadata, error) {
+	var rows *sql.Rows
+	var err error
+
+	if folderID == nil {
+		query := `SELECT id, user_id, folder_id, filename, stored_name, size, path, mime_type, checksum, created_at 
+                 FROM file_metadata WHERE user_id = $1 AND folder_id IS NULL`
+		rows, err = r.db.QueryContext(ctx, query, userID)
+	} else {
+		query := `SELECT id, user_id, folder_id, filename, stored_name, size, path, mime_type, checksum, created_at 
+                 FROM file_metadata WHERE user_id = $1 AND folder_id = $2`
+		rows, err = r.db.QueryContext(ctx, query, userID, folderID)
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -59,14 +94,17 @@ func (r *fileRepo) ListByUserID(ctx context.Context, userID uuid.UUID) ([]*domai
 	var files []*domain.FileMetadata
 	for rows.Next() {
 		f := &domain.FileMetadata{}
-		err := rows.Scan(&f.ID, &f.UserID, &f.FolderID, &f.Filename, &f.StoredName, &f.Size, &f.Path)
+
+		err := rows.Scan(&f.ID, &f.UserID, &f.FolderID, &f.Filename, &f.StoredName, &f.Size, &f.Path, &f.MimeType, &f.Checksum, &f.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
 		files = append(files, f)
 	}
-	if err := rows.Err(); err != nil {
+
+	if err = rows.Err(); err != nil {
 		return nil, err
 	}
+
 	return files, nil
 }

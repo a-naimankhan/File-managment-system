@@ -163,8 +163,8 @@ func (s *FileService) ConvertImageToPDF(ctx context.Context, inputPath string, o
 
 }
 
-func (s *FileService) ListFiles(ctx context.Context, userID uuid.UUID) ([]*domain.FileMetadata, error) {
-	files, err := s.fileRepo.ListByUserID(ctx, userID)
+func (s *FileService) ListFiles(ctx context.Context, userID uuid.UUID, FolderID *uuid.UUID) ([]*domain.FileMetadata, error) {
+	files, err := s.fileRepo.ListByFolderID(ctx, userID, FolderID)
 	if err != nil {
 		return nil, err
 	}
