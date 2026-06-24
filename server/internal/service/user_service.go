@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"net/mail"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -25,22 +26,30 @@ func NewUserService(repo domain.UserRepository, jwtS string) domain.UserService 
 }
 
 func (s *userService) Register(ctx context.Context, username, password, email string) (*domain.User, error) {
+	username = strings.TrimSpace(username)
+	password = strings.TrimSpace(password)
+	email = strings.TrimSpace(email)
+	if username == "" || password == "" || email == "" {
+		return nil, errors.New("user is nil")
+	}
+
 	if len(username) < 3 {
 		return nil, errors.New("username too short")
 	}
 
 	if len(password) < 8 {
-		return nil, errors.New("password too short")
-	}
 
-	existingUsername, _ := s.userRepo.GetByUsername(ctx, username)
-	if existingUsername != nil {
-		return nil, errors.New("username already exists")
+		return nil, errors.New("password too short")
 	}
 
 	_, err := mail.ParseAddress(email)
 	if err != nil {
 		return nil, errors.New("invalid email format")
+	}
+
+	existingUsername, _ := s.userRepo.GetByUsername(ctx, username)
+	if existingUsername != nil {
+		return nil, errors.New("username already exists")
 	}
 
 	existingEmail, _ := s.userRepo.GetByEmail(ctx, email)
