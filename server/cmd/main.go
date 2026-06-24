@@ -72,6 +72,8 @@ func startServer(cfg *config.Config) {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
+	workerPool.Stop()
+
 	log.Println("Shutdown Server ...")
 
 	//5 sec to end the opertaions
