@@ -142,7 +142,18 @@ func (h *Handler) ListFiles(c *gin.Context) {
 		return
 	}
 
-	files, err := h.fileService.ListFiles(c.Request.Context(), userID)
+	folderIDQuery := c.Query("folder_id")
+	var folderIDptr *uuid.UUID
+	if folderIDQuery != "" {
+		parsedFolderID, err := uuid.Parse(folderIDQuery)
+		if err != nil {
+			c.JSON(400, gin.H{"error": "internal error : folder id format"})
+			return
+		}
+		folderIDptr = &parsedFolderID
+	}
+
+	files, err := h.fileService.ListFiles(c.Request.Context(), userID, folderIDptr)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
